@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { Client, Events, Partials, REST, Routes, SlashCommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, Client, CommandInteraction, Events, Interaction, Partials, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import express from 'express';
 import { readdirSync } from 'fs';
 import { join } from 'path';
@@ -8,6 +8,8 @@ import { connect } from './lib/db';
 import { setupScheduler } from './lib/scheduler';
 import { simbriefdata } from './commands/utils/simbriefdata';
 import { registerApplicationCommands } from './lib/applicationCommands';
+import commands, { slashCommands } from './commands';
+import { ApplicationCommandDefinition, CommandDefinition } from './lib/command';
 
 dotenv.config();
 require('elastic-apm-node').start({
@@ -108,6 +110,10 @@ process.on('SIGTERM', () => {
     });
 });
 
-client.on(Events.InteractionCreate, (interaction) => {
-    console.log(interaction);
+client.on(Events.InteractionCreate, async (interaction: Interaction) => {
+    if (interaction.isChatInputCommand()) {
+        const chatInputInteraction = <ChatInputCommandInteraction>interaction;
+        const { executor } = slashCommands[0] as ApplicationCommandDefinition;
+        await executor(chatInputInteraction, client);
+    }
 });

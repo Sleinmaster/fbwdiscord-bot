@@ -1,7 +1,7 @@
-import { Colors } from 'discord.js';
+import { ChatInputCommandInteraction, Colors, Message, SlashCommandStringOption } from 'discord.js';
 import moment from 'moment';
 import { CommandCategory } from '../../constants';
-import { CommandDefinition, replyWithEmbed } from '../../lib/command';
+import { ApplicationCommandDefinition, CommandDefinition, replyWithEmbed } from '../../lib/command';
 import { makeEmbed, makeLines } from '../../lib/embed';
 
 const simbriefEmded = (flightplan) => makeEmbed({
@@ -29,13 +29,22 @@ const errorEmbed = (errorMessage) => makeEmbed({
     color: Colors.Red,
 });
 
-export const simbriefdata: CommandDefinition = {
+export const simbriefdata: ApplicationCommandDefinition = {
     name: 'simbriefdata',
     description: 'Provides infos to the most recent SimBrief flightplan',
     category: CommandCategory.UTILS,
+    options: [
+        new SlashCommandStringOption().setName('SimBriefId').setDescription('Simbrief userId or username'),
+    ],
     executor: async (msg) => {
-        const splitUp = msg.content.split(' ').slice(1);
-        const simbriefId = splitUp[0];
+        let simbriefId;
+        if (msg instanceof Message) {
+            const splitUp = msg.content.split(' ').slice(1);
+            [simbriefId] = splitUp;
+        } else {
+            const interaction = msg as ChatInputCommandInteraction;
+            simbriefId = interaction.options.getString('simbriefId');
+        }
 
         const flightplan = await fetch(`https://www.simbrief.com/api/xml.fetcher.php?json=1&userid=${simbriefId}&username=${simbriefId}`).then((res) => res.json());
 

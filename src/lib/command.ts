@@ -1,4 +1,4 @@
-import { Client, EmbedBuilder, Message, PermissionsString, GuildMember, Colors } from 'discord.js';
+import { Client, EmbedBuilder, Message, PermissionsString, GuildMember, Colors, ChatInputCommandInteraction, ApplicationCommandOptionBase, InteractionResponse } from 'discord.js';
 import { CommandCategory, Roles, Channels, Threads, PermissionsEmbedDelay } from '../constants';
 import { makeEmbed } from './embed';
 
@@ -30,6 +30,11 @@ export interface MessageCommandDefinition extends BaseCommandDefinition {
         a32nx?: EmbedBuilder,
         a380x?: EmbedBuilder,
     },
+}
+
+export interface ApplicationCommandDefinition extends BaseCommandDefinition {
+    executor: (msg: Message | ChatInputCommandInteraction, client?: Client) => Promise<any>,
+    options: ApplicationCommandOptionBase[],
 }
 
 export function isExecutorCommand(command: BaseCommandDefinition) {
@@ -136,7 +141,10 @@ export async function sendPermissionsEmbed(msg: Message, error: string) {
     }
 }
 
-export async function replyWithEmbed(msg: Message, embed: EmbedBuilder) : Promise<Message<boolean>> {
+export async function replyWithEmbed(msg: Message | ChatInputCommandInteraction, embed: EmbedBuilder) : Promise<Message<boolean>|InteractionResponse<boolean>> {
+    if (msg instanceof ChatInputCommandInteraction) {
+        return msg.reply({ embeds: [embed] });
+    }
     return msg.fetchReference()
         .then((res) => {
             let existingFooterText = '';

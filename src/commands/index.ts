@@ -334,6 +334,10 @@ const commands: BaseCommandDefinition[] = [
     simbriefdata,
 ];
 
+export const slashCommands: BaseCommandDefinition[] = [
+    simbriefdata,
+];
+
 const commandsObject: { [k: string]: BaseCommandDefinition } = {};
 
 for (const def of commands) {
