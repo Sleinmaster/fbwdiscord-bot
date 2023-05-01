@@ -1,11 +1,13 @@
 import dotenv from 'dotenv';
-import { Client, Partials } from 'discord.js';
+import { Client, Events, Partials, REST, Routes, SlashCommandBuilder } from 'discord.js';
 import express from 'express';
 import { readdirSync } from 'fs';
 import { join } from 'path';
 import Logger from './lib/logger';
 import { connect } from './lib/db';
 import { setupScheduler } from './lib/scheduler';
+import { simbriefdata } from './commands/utils/simbriefdata';
+import { registerApplicationCommands } from './lib/applicationCommands';
 
 dotenv.config();
 require('elastic-apm-node').start({
@@ -40,7 +42,7 @@ export const client = new Client({
 
 let healthy = false;
 
-client.on('ready', () => {
+client.on('ready', async () => {
     Logger.info(`Logged in as ${client.user.tag}!`);
     healthy = true;
 
@@ -51,6 +53,8 @@ client.on('ready', () => {
         setupScheduler('fbwBotScheduler', process.env.MONGODB_URL)
             .catch(Logger.error);
     }
+
+    await registerApplicationCommands();
 });
 
 client.on('disconnect', () => {
@@ -102,4 +106,8 @@ process.on('SIGTERM', () => {
     app.close(() => {
         Logger.info('Server stopped.');
     });
+});
+
+client.on(Events.InteractionCreate, (interaction) => {
+    console.log(interaction);
 });
