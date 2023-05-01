@@ -1,4 +1,4 @@
-import { EmbedData } from 'discord.js';
+import { EmbedData, InteractionResponse } from 'discord.js';
 import { CommandDefinition, isMessageCommand, MessageCommandDefinition, hasRequiredPermissions, sendPermissionsEmbed, replyWithEmbed } from './command';
 import { AircraftTypeList, CommandCategory } from '../constants';
 import commands from '../commands/index';
@@ -80,6 +80,9 @@ export const typeCommand: CommandDefinition = {
                     value: makeLines(choiceEmbedFieldLines),
                 });
                 await replyWithEmbed(msg, postGenericEmbed).then(async (genericMessage) => {
+                    if (genericMessage instanceof InteractionResponse) {
+                        return;
+                    }
                     commandSupportedAircraftTypeEmojis.forEach(async (element) => {
                         try {
                             await genericMessage.react(element);

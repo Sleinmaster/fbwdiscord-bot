@@ -34,7 +34,7 @@ export const simbriefdata: ApplicationCommandDefinition = {
     description: 'Provides infos to the most recent SimBrief flightplan',
     category: CommandCategory.UTILS,
     options: [
-        new SlashCommandStringOption().setName('SimBriefId').setDescription('Simbrief userId or username'),
+        new SlashCommandStringOption().setName('simbriefid').setDescription('Simbrief userId or username'),
     ],
     executor: async (msg) => {
         let simbriefId;
@@ -43,7 +43,7 @@ export const simbriefdata: ApplicationCommandDefinition = {
             [simbriefId] = splitUp;
         } else {
             const interaction = msg as ChatInputCommandInteraction;
-            simbriefId = interaction.options.getString('simbriefId');
+            simbriefId = interaction.options.getString('simbriefid');
         }
 
         const flightplan = await fetch(`https://www.simbrief.com/api/xml.fetcher.php?json=1&userid=${simbriefId}&username=${simbriefId}`).then((res) => res.json());
